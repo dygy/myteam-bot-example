@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/mail-ru-im/bot-golang"
 	"log"
+	"time"
 )
 
 func main() {
@@ -21,6 +22,24 @@ func main() {
 	var ctx = context.Background()
 	updates := bot.GetUpdatesChannel(ctx)
 	var fileNow = ""
+	addTSK := botgolang.NewCallbackButton("add task", "task")
+	resBrn := botgolang.NewCallbackButton("Result of the week", "res")
+	spamButton := botgolang.NewCallbackButton("Spam this chat", "spam")
+	testLinkButton := botgolang.NewURLButton("test", "https://mail.ru/")
+
+	message := bot.NewMessage(account)
+	keyboard := botgolang.NewKeyboard()
+	keyboard.AddRow(
+		addTSK,
+		resBrn,
+		spamButton,
+		testLinkButton,
+	)
+	message.AttachInlineKeyboard(keyboard)
+	message.Text = " "
+	if err := message.Send(); err != nil {
+		log.Printf("failed to send message: %s", err)
+	}
 	for update := range updates {
 		// fmt.Println(update.Type, update.Payload)
 		switch update.Type {
@@ -47,6 +66,7 @@ func main() {
 				var chat = update.Payload.Chat.ID
 				addTSK := botgolang.NewCallbackButton("add task", "task")
 				resBrn := botgolang.NewCallbackButton("Result of the week", "res")
+				spamButton := botgolang.NewCallbackButton("Spam this chat", "spam")
 				testLinkButton := botgolang.NewURLButton("test", "https://mail.ru/")
 
 				message := bot.NewMessage(chat)
@@ -54,6 +74,7 @@ func main() {
 				keyboard.AddRow(
 					addTSK,
 					resBrn,
+					spamButton,
 					testLinkButton,
 				)
 				message.AttachInlineKeyboard(keyboard)
@@ -64,7 +85,9 @@ func main() {
 			}
 		case botgolang.CALLBACK_QUERY:
 			data := update.Payload.CallbackQuery()
-			if data.CallbackData == "res" {
+			if data.CallbackData == "spam" {
+				spam(bot, account)
+			} else if data.CallbackData == "res" {
 				err := bot.SendMessage(bot.NewTextMessage(
 					account,
 					allFilesData(),
@@ -85,5 +108,17 @@ func main() {
 			}
 		}
 
+	}
+}
+
+func spam(bot *botgolang.Bot, account string) {
+	for i := 0; i < 1000; i++ {
+		time.Sleep(100)
+		message := bot.NewMessage(account)
+		message.Text = "Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur?"
+		err := message.Send()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
