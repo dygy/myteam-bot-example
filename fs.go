@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var jiraLink = GoDotEnvVariable("jiralink")
+
 func readFIle(fileName string) string {
 	// Open file for reading
 	file, err := os.Open(fileName)
@@ -23,7 +25,11 @@ func readFIle(fileName string) string {
 }
 
 func replaceTasks(text string) string {
-	return strings.ReplaceAll(text, "task_" ,"https://jira.mail.ru/browse/" )
+	return strings.ReplaceAll(
+		strings.ReplaceAll(
+			text, "task_", jiraLink,
+		), "hotfix_", jiraLink,
+	)
 }
 
 func WriteFile(filename string, message string) {
@@ -43,7 +49,7 @@ func allFilesData() string {
 	var files, _ = os.ReadDir("task")
 	var res = ""
 	for _, f := range files {
-		res += replaceTasks(f.Name()) + " : " + readFIle("task/" + f.Name()) + "\n"
+		res += replaceTasks(f.Name()) + " : " + readFIle("task/"+f.Name()) + "\n"
 	}
 	return res
 }

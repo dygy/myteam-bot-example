@@ -47,11 +47,14 @@ func main() {
 				var chat = update.Payload.Chat.ID
 				addTSK := botgolang.NewCallbackButton("add task", "task")
 				resBrn := botgolang.NewCallbackButton("Result of the week", "res")
+				testLinkButton := botgolang.NewURLButton("test", "https://mail.ru/")
+
 				message := bot.NewMessage(chat)
 				keyboard := botgolang.NewKeyboard()
 				keyboard.AddRow(
 					addTSK,
 					resBrn,
+					testLinkButton,
 				)
 				message.AttachInlineKeyboard(keyboard)
 				message.Text = " "
@@ -69,7 +72,7 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				} else {
-					DeleteAllFiles();
+					DeleteAllFiles()
 				}
 			} else {
 				fileNow = "true"
@@ -84,4 +87,3 @@ func main() {
 
 	}
 }
-
