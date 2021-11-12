@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/mail-ru-im/bot-golang"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -24,7 +26,7 @@ func main() {
 	var fileNow = ""
 	addTSK := botgolang.NewCallbackButton("add task", "task")
 	resBrn := botgolang.NewCallbackButton("Result of the week", "res")
-	spamButton := botgolang.NewCallbackButton("Spam this chat", "spam")
+	spamButton := botgolang.NewCallbackButton("Spam this chat", "spam"+account)
 	testLinkButton := botgolang.NewURLButton("test", "https://mail.ru/")
 
 	message := bot.NewMessage(account)
@@ -41,7 +43,7 @@ func main() {
 		log.Printf("failed to send message: %s", err)
 	}
 	for update := range updates {
-		// fmt.Println(update.Type, update.Payload)
+		fmt.Println(update.Type, update.Payload)
 		switch update.Type {
 		case botgolang.NEW_MESSAGE:
 			message := update.Payload.Message()
@@ -63,13 +65,12 @@ func main() {
 					log.Fatal(err)
 				}
 			} else {
-				var chat = update.Payload.Chat.ID
 				addTSK := botgolang.NewCallbackButton("add task", "task")
 				resBrn := botgolang.NewCallbackButton("Result of the week", "res")
-				spamButton := botgolang.NewCallbackButton("Spam this chat", "spam")
+				spamButton := botgolang.NewCallbackButton("Spam this chat", "spam"+update.Payload.Chat.ID)
 				testLinkButton := botgolang.NewURLButton("test", "https://mail.ru/")
 
-				message := bot.NewMessage(chat)
+				message := bot.NewMessage(update.Payload.Chat.ID)
 				keyboard := botgolang.NewKeyboard()
 				keyboard.AddRow(
 					addTSK,
@@ -85,8 +86,8 @@ func main() {
 			}
 		case botgolang.CALLBACK_QUERY:
 			data := update.Payload.CallbackQuery()
-			if data.CallbackData == "spam" {
-				spam(bot, account)
+			if strings.Contains(data.CallbackData, "spam") {
+				spam(bot, strings.Replace(data.CallbackData, "spam", "", 1))
 			} else if data.CallbackData == "res" {
 				err := bot.SendMessage(bot.NewTextMessage(
 					account,
@@ -112,7 +113,7 @@ func main() {
 }
 
 func spam(bot *botgolang.Bot, account string) {
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 500; i++ {
 		time.Sleep(100)
 		message := bot.NewMessage(account)
 		message.Text = "Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur?"
